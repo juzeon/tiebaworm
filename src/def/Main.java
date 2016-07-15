@@ -2,23 +2,56 @@ package def;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+//import net.sf.json.*;
 /*
  * 
  * */
 public class Main implements Runnable{
 	Printer p;
+	int pageBegin,pageEnd;
 	ArrayList<String> topicsString;
 	ArrayList<Topic> topics;
+	FileWriter fw;
 	public static void main(String[] args) throws Exception{
-		Main lxl=new Main();
-		lxl.start();
+		Main no1=new Main(0,3);
+		Thread no1_thread=new Thread(no1);
+		no1_thread.start();
 	}
-	public void start() throws Exception{
+	public void run(){
+		// TODO Auto-generated method stub
 		topicsString=new ArrayList<String>();
 		topics=new ArrayList<Topic>();
 		p=new Printer();
-		getTopic(0);
+		for(int i=pageBegin;i<pageEnd;i++){
+			getTopic(i);
+		}
 		workTopic();
+		printToFile();
+	}   
+	public synchronized void printToFile(){
+		try{
+			fw=new FileWriter("./output.txt",true);
+			fw.write("{\n");
+			for(int i=0;i<topics.size();i++){
+				String title=topics.get(i).title;
+				String id=topics.get(i).id;
+				String text=topics.get(i).text;
+				String user=topics.get(i).user;
+				title=title.replaceAll("\"","'");
+				text=text.replaceAll("\"","'");
+				user=user.replaceAll("\"","'");
+				fw.write("[{\"id\":\""+id+"\",\"title\":\""+title+"\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
+			}
+			fw.write("\n]\n}");
+			fw.flush();
+			fw.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	public Main(int pageBegin,int pageEnd){
+		this.pageBegin=pageBegin;
+		this.pageEnd=pageEnd;
 	}
 	public void getTopic(int page){
 		String url="http://tieba.baidu.com/f?kw=%E5%B0%91%E5%B9%B4%E7%94%B5%E8%84%91%E4%B8%96%E7%95%8C&ie=utf-8&pn="
@@ -28,9 +61,13 @@ public class Main implements Runnable{
 		String[] header=footer[1].split("共有主题数<span class=\"red_text\">");
 		//String[] topicStr=header[0].split("<div class=\"threadlist_abs threadlist_abs_onlyline");
 		String[] topicStr=header[0].split("<div class=\"col2_right j_threadlist_li_right \">");
-		for(int i=0;i<topicStr.length-1;i++){
+		
+		/*for(int i=0;i<topicStr.length-1;i++){
 			topicsString.add(topicStr[i+1]);
-		}
+		}*/
+		
+		topicsString.add(topicStr[1]);
+		topicsString.add(topicStr[2]);
 	}
 	public void workTopic(){
 		for(int i=0;i<topicsString.size();i++){
@@ -46,7 +83,6 @@ public class Main implements Runnable{
 		String url="http://tieba.baidu.com/p/"+id;
 		String html=sendGet(url);
 		return getMiddleText(html,"class=\"d_post_content j_d_post_content \">", "<div class=\"user-hide-post-down\" style=\"display: none;\">");
-		
 	}
 	public String getMiddleText(String text,String header,String footer){
 		String[] work_footer=text.split(header);
@@ -72,15 +108,17 @@ public class Main implements Runnable{
             connection.setRequestProperty("accept", "*/*");    
             connection.setRequestProperty("connection", "Keep-Alive");    
             connection.setRequestProperty("user-agent",    
-                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");    
+                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
             // 建立实际的连接    
             connection.connect();    
             // 获取所有响应头字段    
             Map<String, List<String>> map = connection.getHeaderFields();    
             // 遍历所有的响应头字段    
-            for (String key : map.keySet()) {    
+            /*for (String key : map.keySet()) {    
                 System.out.println(key + "--->" + map.get(key));    
-            }    
+            } */   
             // 定义 BufferedReader输入流来读取URL的响应    
             in = new BufferedReader(new InputStreamReader(connection.getInputStream()));    
             String line;    
@@ -88,24 +126,20 @@ public class Main implements Runnable{
                 result += line;    
             }    
         } catch (Exception e) {    
-            System.err.println("发送GET请求出现异常！" + e);    
+            System.err.println("Sent get message error!" + e);    
             e.printStackTrace();    
         }    
         // 使用finally块来关闭输入流    
         finally {    
             try {    
+            	System.out.println("Sent get message '"+url+"' successfully!");
                 if (in != null) {    
                     in.close();    
                 }    
             } catch (Exception e2) {    
                 e2.printStackTrace();    
             }    
-        }    
-    
+        }
         return result;    
-    }
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}    
+    } 
 }

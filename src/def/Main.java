@@ -12,7 +12,6 @@ public class Main implements Runnable{
 	ArrayList<String> topicsString;
 	ArrayList<Topic> topics;
 	FileWriter fw;
-	long filename;
 	public static void main(String[] args) throws Exception{
 		/*Main no1=new Main(0,2);
 		Thread no1_thread=new Thread(no1);
@@ -25,8 +24,15 @@ public class Main implements Runnable{
 		// TODO Auto-generated method stub
 		topicsString=new ArrayList<String>();
 		topics=new ArrayList<Topic>();
-		filename=System.currentTimeMillis();
 		p=new Printer();
+		try {
+			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
+			fw.write("{\n\"data\":[\n");
+			fw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		for(int i=pageBegin;i<pageEnd;i++){
 			getTopic(i);
 		}
@@ -35,8 +41,7 @@ public class Main implements Runnable{
 	}   
 	public synchronized void printToFile(){
 		try{
-			fw=new FileWriter("./tiebaworm-"+filename+".txt",true);
-			fw.write("{\n\"data\":[\n");
+			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
 			for(int i=0;i<topics.size();i++){
 				String title=topics.get(i).title;
 				String id=topics.get(i).id;
@@ -51,7 +56,7 @@ public class Main implements Runnable{
 					fw.write("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
 				}
 			}
-			fw.write("\n]\n}");
+			/*fw.write("\n]\n}");*/
 			fw.flush();
 			fw.close();
 		}catch(Exception e){

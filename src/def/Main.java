@@ -13,9 +13,12 @@ public class Main implements Runnable{
 	ArrayList<Topic> topics;
 	FileWriter fw;
 	public static void main(String[] args) throws Exception{
-		Main no1=new Main(0,3);
+		/*Main no1=new Main(0,2);
 		Thread no1_thread=new Thread(no1);
-		no1_thread.start();
+		no1_thread.start();*/
+		for(int i=0;i<27;i++){
+			new Thread(new Main(i,++i)).start();
+		}
 	}
 	public void run(){
 		// TODO Auto-generated method stub
@@ -30,8 +33,9 @@ public class Main implements Runnable{
 	}   
 	public synchronized void printToFile(){
 		try{
-			fw=new FileWriter("./output.txt",true);
-			fw.write("{\n");
+			long filename=System.currentTimeMillis();
+			fw=new FileWriter("./tiebaworm-"+filename+".txt",true);
+			fw.write("{\n\"data\":[\n");
 			for(int i=0;i<topics.size();i++){
 				String title=topics.get(i).title;
 				String id=topics.get(i).id;
@@ -40,7 +44,11 @@ public class Main implements Runnable{
 				title=title.replaceAll("\"","'");
 				text=text.replaceAll("\"","'");
 				user=user.replaceAll("\"","'");
-				fw.write("[{\"id\":\""+id+"\",\"title\":\""+title+"\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
+				if(i==topics.size()-1){
+					fw.write("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"}\n");
+				}else{
+					fw.write("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
+				}
 			}
 			fw.write("\n]\n}");
 			fw.flush();
@@ -62,12 +70,12 @@ public class Main implements Runnable{
 		//String[] topicStr=header[0].split("<div class=\"threadlist_abs threadlist_abs_onlyline");
 		String[] topicStr=header[0].split("<div class=\"col2_right j_threadlist_li_right \">");
 		
-		/*for(int i=0;i<topicStr.length-1;i++){
+		for(int i=0;i<topicStr.length-1;i++){
 			topicsString.add(topicStr[i+1]);
-		}*/
+		}
 		
-		topicsString.add(topicStr[1]);
-		topicsString.add(topicStr[2]);
+		/*topicsString.add(topicStr[1]);
+		topicsString.add(topicStr[2]);*/
 	}
 	public void workTopic(){
 		for(int i=0;i<topicsString.size();i++){
@@ -76,6 +84,7 @@ public class Main implements Runnable{
 			String title=getMiddleText(atopic,"target=\"_blank\" class=\"j_th_tit \">","</a></div><div class=\"threadlist_author pull_right");
 			String user=getMiddleText(atopic,"title=\"主题作者: ","\"data-field=(.*)><i class=\"icon_author\"></i><span class");
 			String text=getArticle(id);
+			p.println("Article title："+title);
 			topics.add(new Topic(id,title,text,user));
 		}
 	}

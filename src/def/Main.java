@@ -12,6 +12,7 @@ public class Main implements Runnable{
 	ArrayList<String> topicsString;
 	ArrayList<Topic> topics;
 	FileWriter fw;
+	long filename;
 	public static void main(String[] args) throws Exception{
 		/*Main no1=new Main(0,2);
 		Thread no1_thread=new Thread(no1);
@@ -24,6 +25,7 @@ public class Main implements Runnable{
 		// TODO Auto-generated method stub
 		topicsString=new ArrayList<String>();
 		topics=new ArrayList<Topic>();
+		filename=System.currentTimeMillis();
 		p=new Printer();
 		for(int i=pageBegin;i<pageEnd;i++){
 			getTopic(i);
@@ -33,7 +35,6 @@ public class Main implements Runnable{
 	}   
 	public synchronized void printToFile(){
 		try{
-			long filename=System.currentTimeMillis();
 			fw=new FileWriter("./tiebaworm-"+filename+".txt",true);
 			fw.write("{\n\"data\":[\n");
 			for(int i=0;i<topics.size();i++){
@@ -82,7 +83,8 @@ public class Main implements Runnable{
 			String atopic=topicsString.get(i);
 			String id=getMiddleText(atopic, "<a href=\"/p/", "\" title=");
 			String title=getMiddleText(atopic,"target=\"_blank\" class=\"j_th_tit \">","</a></div><div class=\"threadlist_author pull_right");
-			String user=getMiddleText(atopic,"title=\"主题作者: ","\"data-field=(.*)><i class=\"icon_author\"></i><span class");
+			//String user=getMiddleText(atopic,"title=\"主题作者: ","\"data-field=(.*?)><i class=\"icon_author\"></i><span class");
+			String user=getMiddleText(atopic,"title=\"主题作者: ","\"(.*?)data-field");
 			String text=getArticle(id);
 			p.println("Article title："+title);
 			topics.add(new Topic(id,title,text,user));
@@ -91,7 +93,7 @@ public class Main implements Runnable{
 	public String getArticle(String id){
 		String url="http://tieba.baidu.com/p/"+id;
 		String html=sendGet(url);
-		return getMiddleText(html,"class=\"d_post_content j_d_post_content \">", "<div class=\"user-hide-post-down\" style=\"display: none;\">");
+		return getMiddleText(html,"<div id=\"post_content_(\\d*?)\" class=\"d_post_content j_d_post_content \">", "</div>");
 	}
 	public String getMiddleText(String text,String header,String footer){
 		String[] work_footer=text.split(header);

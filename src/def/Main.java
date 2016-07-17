@@ -11,13 +11,42 @@ public class Main implements Runnable{
 	int pageBegin,pageEnd;
 	ArrayList<String> topicsString;
 	ArrayList<Topic> topics;
-	FileWriter fw;
+	public static FileWriter fw;
 	public static void main(String[] args) throws Exception{
+		Thread et=new Thread(new EmptyThread(27));//27
+		et.start();
+		writeHeader();
+		for(int i=0;i<27;i++){
+			new Thread(new Main(i,i+1)).start();
+		}
 		/*Main no1=new Main(0,2);
 		Thread no1_thread=new Thread(no1);
 		no1_thread.start();*/
-		for(int i=0;i<27;i++){
-			new Thread(new Main(i,++i)).start();
+		/*new Thread(new Main(0,1)).start();
+		new Thread(new Main(1,2)).start();*/
+	}
+	public static void writeHeader(){
+		try {
+			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
+			Printer.sb.append("{\n\"data\":[\n");
+			fw.write("{\n\"data\":[\n");
+			fw.flush();
+			fw.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public static void writeFooter(){
+		try {
+			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
+			Printer.sb.append("\n]\n}");
+			fw.write("\n]\n}");
+			fw.flush();
+			fw.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	public void run(){
@@ -25,19 +54,13 @@ public class Main implements Runnable{
 		topicsString=new ArrayList<String>();
 		topics=new ArrayList<Topic>();
 		p=new Printer();
-		try {
-			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
-			fw.write("{\n\"data\":[\n");
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		for(int i=pageBegin;i<pageEnd;i++){
 			getTopic(i);
 		}
 		workTopic();
 		printToFile();
+		EmptyThread.emptyThread[pageBegin]=true;
+		p.println("Worm No."+pageBegin+" has been over");
 	}   
 	public synchronized void printToFile(){
 		try{
@@ -48,13 +71,17 @@ public class Main implements Runnable{
 				String text=topics.get(i).text;
 				String user=topics.get(i).user;
 				title=title.replaceAll("\"","'");
+				title=title.replaceAll("\\\\","/");
 				text=text.replaceAll("\"","'");
+				text=text.replaceAll("\\\\","/");
 				user=user.replaceAll("\"","'");
-				if(i==topics.size()-1){
+				/*if(i==topics.size()-1){
 					fw.write("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"}\n");
 				}else{
 					fw.write("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
-				}
+				}*/
+				Printer.sb.append("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
+				fw.write("{\"id\":\""+id+"\",\"title\":\""+title+"\",\"text\":\""+text+"\",\"user\":\""+user+"\"},\n");
 			}
 			/*fw.write("\n]\n}");*/
 			fw.flush();
@@ -142,8 +169,7 @@ public class Main implements Runnable{
                 result += line;    
             }    
         } catch (Exception e) {    
-            System.err.println("Sent get message error!" + e);    
-            e.printStackTrace();    
+            System.err.println("Sent get error: " + e);   
         }    
         // 使用finally块来关闭输入流    
         finally {    

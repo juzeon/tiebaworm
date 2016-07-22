@@ -1,30 +1,23 @@
 package def;
+import java.awt.print.Pageable;
 import java.io.*;
-import java.util.*;
 import java.net.*;
-//import net.sf.json.*;
-/*
- * 
- * */
-public class Main implements Runnable{
+import java.util.*;
+public class Worm implements Runnable{
 	Printer p;
 	int pageBegin,pageEnd;
 	ArrayList<String> topicsString;
 	ArrayList<Topic> topics;
+	String tiebaName;
 	public static FileWriter fw;
-	public static void main(String[] args) throws Exception{
+	/*public static void main(String[] args) throws Exception{
 		Thread et=new Thread(new EmptyThread(27));//27
 		et.start();
 		writeHeader();
 		for(int i=0;i<27;i++){
-			new Thread(new Main(i,i+1)).start();
+			new Thread(new Worm(i,i+1)).start();
 		}
-		/*Main no1=new Main(0,2);
-		Thread no1_thread=new Thread(no1);
-		no1_thread.start();*/
-		/*new Thread(new Main(0,1)).start();
-		new Thread(new Main(1,2)).start();*/
-	}
+	}*/
 	public static void writeHeader(){
 		try {
 			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
@@ -33,8 +26,7 @@ public class Main implements Runnable{
 			fw.flush();
 			fw.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MyFrame.addOutput("[ERROR]When writeHeader(),"+e.getMessage());
 		}
 	}
 	public static void writeFooter(){
@@ -45,12 +37,10 @@ public class Main implements Runnable{
 			fw.flush();
 			fw.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MyFrame.addOutput("[ERROR]When writeFooter(),"+e.getMessage());
 		}
 	}
 	public void run(){
-		// TODO Auto-generated method stub
 		topicsString=new ArrayList<String>();
 		topics=new ArrayList<Topic>();
 		p=new Printer();
@@ -60,7 +50,8 @@ public class Main implements Runnable{
 		workTopic();
 		printToFile();
 		EmptyThread.emptyThread[pageBegin]=true;
-		p.println("Worm No."+pageBegin+" has been over");
+		MyFrame.addOutput("[DEBUG]Worm No."+pageBegin+" has been over");
+		//p.println("Worm No."+pageBegin+" has been over");
 	}   
 	public synchronized void printToFile(){
 		try{
@@ -87,15 +78,17 @@ public class Main implements Runnable{
 			fw.flush();
 			fw.close();
 		}catch(Exception e){
-			e.printStackTrace();
+			MyFrame.addOutput("[ERROR]When printToFile(),"+e.getMessage());
 		}
 	}
-	public Main(int pageBegin,int pageEnd){
+	public Worm(String tiebaName,int pageBegin,int pageEnd){
 		this.pageBegin=pageBegin;
 		this.pageEnd=pageEnd;
+		this.tiebaName=tiebaName;
+		MyFrame.addOutput("[DEBUG]Worm No."+pageBegin+" is running.");
 	}
 	public void getTopic(int page){
-		String url="http://tieba.baidu.com/f?kw=%E5%B0%91%E5%B9%B4%E7%94%B5%E8%84%91%E4%B8%96%E7%95%8C&ie=utf-8&pn="
+		String url="http://tieba.baidu.com/f?kw="+tiebaName+"&ie=utf-8&pn="
 		+workPage(page);
 		String html=sendGet(url);
 		String[] footer=html.split("<span class=\"card_numLabel\">贴子：</span>");
@@ -118,7 +111,8 @@ public class Main implements Runnable{
 			//String user=getMiddleText(atopic,"title=\"主题作者: ","\"data-field=(.*?)><i class=\"icon_author\"></i><span class");
 			String user=getMiddleText(atopic,"title=\"主题作者: ","\"(.*?)data-field");
 			String text=getArticle(id);
-			p.println("Article title："+title);
+			//p.println("Article title："+title);
+			MyFrame.addOutput("[DEBUG]Article title:"+title);
 			topics.add(new Topic(id,title,text,user));
 		}
 	}
@@ -157,7 +151,7 @@ public class Main implements Runnable{
             // 建立实际的连接    
             connection.connect();    
             // 获取所有响应头字段    
-            Map<String, List<String>> map = connection.getHeaderFields();    
+            Map<String, java.util.List<String>> map = connection.getHeaderFields();    
             // 遍历所有的响应头字段    
             /*for (String key : map.keySet()) {    
                 System.out.println(key + "--->" + map.get(key));    
@@ -169,19 +163,21 @@ public class Main implements Runnable{
                 result += line;    
             }    
         } catch (Exception e) {    
-            System.err.println("Sent get error: " + e);   
+            //System.err.println("Sent get error: " + e); 
+        	MyFrame.addOutput("[ERROR]Sent get error:"+e);
         }    
         // 使用finally块来关闭输入流    
         finally {    
             try {    
-            	System.out.println("Sent get message '"+url+"' successfully!");
+            	//System.out.println("Sent get message '"+url+"' successfully!");
+            	MyFrame.addOutput("[DEBUG]Sent get '"+url+"' successfully.");
                 if (in != null) {    
                     in.close();    
                 }    
             } catch (Exception e2) {    
-                e2.printStackTrace();    
+            	MyFrame.addOutput("[ERROR]Close output stream error:"+e2.getMessage());  
             }    
         }
         return result;    
-    } 
+    }
 }

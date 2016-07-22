@@ -28,7 +28,7 @@ public class EmptyThread implements Runnable{
 			if(isOK==true){
 				//所有线程执行完毕
 				try{
-					Main.writeFooter();
+					Worm.writeFooter();
 					int idx=Printer.sb.lastIndexOf(",");
 					String str1=Printer.sb.substring(0, idx);
 					String str2=Printer.sb.substring(idx+1, Printer.sb.length());
@@ -40,7 +40,8 @@ public class EmptyThread implements Runnable{
 				}catch(Exception e){
 					e.printStackTrace();
 				}
-				p.println("All the worms have been over");
+				//p.println("All the worms have been over");
+				MyFrame.addOutput("[DEBUG]All the worms have been over.");
 				break;
 			}
 			try{

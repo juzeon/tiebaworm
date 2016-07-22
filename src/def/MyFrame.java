@@ -3,18 +3,26 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 import java.awt.event.*;
+import java.net.*;
 public class MyFrame extends JFrame implements ActionListener{
-	JButton startBtn;
-	JTextArea textarea;
+	JButton startBtn,showExample;
+	static JTextArea textarea;
 	JPanel top,bottom,p1,p2;
-	JTextField url_t,pageBegin_t,pageEnd_t;
-	JLabel output_l,url_l,pageBegin_l,pageEnd_l;
+	JTextField tiebaName_t,pageBegin_t,pageEnd_t;
+	JLabel output_l,tiebaName_l,pageBegin_l,pageEnd_l;
+	static StringBuilder output=new StringBuilder();
 	public static void main(String[] args) {
 		MyFrame myFrame=new MyFrame();
 		myFrame.frame();
 	}
+	public static void addOutput(String outputText){
+		output.insert(0,outputText+"\n");
+		textarea.setText(output.toString());
+		//textarea.paintImmediately(textarea.getBounds());
+	}
 	public void frame(){
 		startBtn=new JButton("Start");
+		showExample=new JButton("Show example");
 		textarea=new JTextArea();
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
@@ -26,17 +34,20 @@ public class MyFrame extends JFrame implements ActionListener{
 		p2.setLayout(new FlowLayout());
 		bottom.add(p1);
 		bottom.add(p2);
-		url_t=new JTextField(30);
+		tiebaName_t=new JTextField(30);
 		pageBegin_t=new JTextField(5);
 		pageEnd_t=new JTextField(5);
 		output_l=new JLabel("Output:                                       Code by juzeon.");
-		url_l=new JLabel("Url:");
+		tiebaName_l=new JLabel("Tieba name:");
 		pageBegin_l=new JLabel("Pages begin with:(number)");
 		pageEnd_l=new JLabel("Pages end with:(number)");
 		startBtn.setActionCommand("startBtn");
 		startBtn.addActionListener(this);
-		p1.add(url_l);
-		p1.add(url_t);
+		showExample.setActionCommand("showExample");
+		showExample.addActionListener(this);
+		p1.add(tiebaName_l);
+		p1.add(tiebaName_t);
+		p1.add(showExample);
 		p2.add(pageBegin_l);
 		p2.add(pageBegin_t);
 		p2.add(pageEnd_l);
@@ -65,26 +76,38 @@ public class MyFrame extends JFrame implements ActionListener{
 				JOptionPane.showMessageDialog(null,er.getMessage(),"There is something wrong with pageBegin/pageEnd:",JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			String url=url_t.getText();
-			if(JOptionPane.showConfirmDialog(null,"Your input:\nurl:"+url+"\npageBegin:"+pageBegin+"\npageEnd:"+pageEnd+
-					"\nAre you ready to start the worms now?","Check your input:",JOptionPane.YES_NO_OPTION)==1){
+			String tiebaName="";
+			try {
+				tiebaName=URLEncoder.encode(tiebaName_t.getText(),"UTF-8");
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			if(JOptionPane.showConfirmDialog(null,"Your input:\ntieba name(url encoded):"+tiebaName+"\npageBegin:"+pageBegin+"\npageEnd:"+pageEnd+
+					"\nAre you ready for it?","Check your input:",JOptionPane.YES_NO_OPTION)==1){
 				return;
 			}
-			startWorm(pageBegin, pageEnd);
+			startWorm(tiebaName,pageBegin, pageEnd);
+		}else if(e.getActionCommand().equals("showExample")){
+			JOptionPane.showMessageDialog(null,"Tieba name:minecraft\nPages begin with:1\nPages end with:10","An example:",JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
-	public void startWorm(int pageBegin,int pageEnd){
-		System.out.println("start!");
+	public void startWorm(String tiebaName,int pageBegin,int pageEnd){
+		Thread et=new Thread(new EmptyThread(pageEnd-pageBegin+1));//27
+		et.start();
+		Worm.writeHeader();
+		for(int i=pageBegin-1;i<pageEnd;i++){
+			new Thread(new Worm(tiebaName,i,i+1)).start();
+		}
 	}
 	public boolean checkField(){
-		if(isNullOrEmpty(url_t.getText())||isNullOrEmpty(pageBegin_t.getText())||isNullOrEmpty(pageEnd_t.getText())){
+		if(isNullOrEmpty(tiebaName_t.getText())||isNullOrEmpty(pageBegin_t.getText())||isNullOrEmpty(pageEnd_t.getText())){
 			JOptionPane.showMessageDialog(null,"Url,pageBegin or pageEnd is empty!","Check your input:",JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
-		if(!((url_t.getText().startsWith("http://")||(url_t.getText().startsWith("https://"))))){
+		/*if(!((url_t.getText().startsWith("http://")||(url_t.getText().startsWith("https://"))))){
 			JOptionPane.showMessageDialog(null,"Url must start with 'http://' or 'https://'.","Check your input:",JOptionPane.ERROR_MESSAGE);
 			return false;
-		}
+		}*/
 		return true;
 	}
 

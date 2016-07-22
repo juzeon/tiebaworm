@@ -33,7 +33,7 @@ public class EmptyThread implements Runnable{
 					String str1=Printer.sb.substring(0, idx);
 					String str2=Printer.sb.substring(idx+1, Printer.sb.length());
 					String result=str1+str2;
-					fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt");
+					fw=new FileWriter("./tiebaworm-"+Printer.filename);
 					fw.write(result);
 					fw.flush();
 					fw.close();

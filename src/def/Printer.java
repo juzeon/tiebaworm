@@ -1,6 +1,6 @@
 package def;
 class Printer {
-	public static long filename=System.currentTimeMillis();
+	public static String filename=System.currentTimeMillis()+".json";
 	public static StringBuilder sb=new StringBuilder();
 	public void println(Object str){
 		System.out.println(str);

@@ -20,7 +20,7 @@ public class Worm implements Runnable{
 	}*/
 	public static void writeHeader(){
 		try {
-			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
+			fw=new FileWriter("./tiebaworm-"+Printer.filename,true);
 			Printer.sb.append("{\n\"data\":[\n");
 			fw.write("{\n\"data\":[\n");
 			fw.flush();
@@ -31,7 +31,7 @@ public class Worm implements Runnable{
 	}
 	public static void writeFooter(){
 		try {
-			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
+			fw=new FileWriter("./tiebaworm-"+Printer.filename,true);
 			Printer.sb.append("\n]\n}");
 			fw.write("\n]\n}");
 			fw.flush();
@@ -47,7 +47,12 @@ public class Worm implements Runnable{
 		for(int i=pageBegin;i<pageEnd;i++){
 			getTopic(i);
 		}
-		workTopic();
+		try{
+			workTopic();
+		}catch(Exception e){
+			e.printStackTrace();
+			MyFrame.addOutput("[ERROR]An error happened:"+e.getMessage());
+		}
 		printToFile();
 		EmptyThread.emptyThread[pageBegin]=true;
 		MyFrame.addOutput("[DEBUG]Worm No."+pageBegin+" has been over");
@@ -55,7 +60,7 @@ public class Worm implements Runnable{
 	}   
 	public synchronized void printToFile(){
 		try{
-			fw=new FileWriter("./tiebaworm-"+Printer.filename+".txt",true);
+			fw=new FileWriter("./tiebaworm-"+Printer.filename,true);
 			for(int i=0;i<topics.size();i++){
 				String title=topics.get(i).title;
 				String id=topics.get(i).id;
@@ -103,7 +108,7 @@ public class Worm implements Runnable{
 		/*topicsString.add(topicStr[1]);
 		topicsString.add(topicStr[2]);*/
 	}
-	public void workTopic(){
+	public void workTopic() throws Exception{
 		for(int i=0;i<topicsString.size();i++){
 			String atopic=topicsString.get(i);
 			String id=getMiddleText(atopic, "<a href=\"/p/", "\" title=");
@@ -116,12 +121,12 @@ public class Worm implements Runnable{
 			topics.add(new Topic(id,title,text,user));
 		}
 	}
-	public String getArticle(String id){
+	public String getArticle(String id) throws Exception{
 		String url="http://tieba.baidu.com/p/"+id;
 		String html=sendGet(url);
 		return getMiddleText(html,"<div id=\"post_content_(\\d*?)\" class=\"d_post_content j_d_post_content \">", "</div>");
 	}
-	public String getMiddleText(String text,String header,String footer){
+	public String getMiddleText(String text,String header,String footer) throws Exception{
 		String[] work_footer=text.split(header);
 		String[] work_header=work_footer[1].split(footer);
 		return work_header[0];

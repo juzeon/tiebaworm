@@ -7,7 +7,6 @@ import java.net.*;
 import java.io.*;
 /*
  * 即将加入：
- * 1.文件名自定义
  * 2.更好的设置界面
  * 3.停止按钮
  * */
@@ -17,6 +16,7 @@ public class MyFrame extends JFrame implements ActionListener{
 	JPanel top,bottom,p1,p2;
 	JTextField tiebaName_t,pageBegin_t,pageEnd_t,filename_t;
 	JLabel output_l,tiebaName_l,pageBegin_l,pageEnd_l,filename_l;
+	String version_s;
 	static StringBuilder output=new StringBuilder();
 	public static void main(String[] args) {
 		MyFrame myFrame=new MyFrame();
@@ -33,6 +33,19 @@ public class MyFrame extends JFrame implements ActionListener{
 		textarea=new JTextArea();
 		textarea.setLineWrap(true);
 		textarea.setWrapStyleWord(true);
+		version_s="[ERROR]";
+		try{
+			InputStream is=this.getClass().getResourceAsStream("/res/version.txt");   
+			BufferedReader br=new BufferedReader(new InputStreamReader(is));  
+			String s="";
+			s=br.readLine();
+			version_s=s;
+			output.append("Program version:"+s);
+			textarea.setText(output.toString());
+		}catch(Exception e){
+			//e.printStackTrace();
+			addOutput("[WARNING]Can't read version.txt:"+e.getMessage());
+		}
 		try{
 			InputStream is=this.getClass().getResourceAsStream("/res/draw.txt");   
 			BufferedReader br=new BufferedReader(new InputStreamReader(is));  
@@ -58,7 +71,7 @@ public class MyFrame extends JFrame implements ActionListener{
 		filename_t.setText(Printer.filename);
 		pageBegin_t=new JTextField(5);
 		pageEnd_t=new JTextField(5);
-		output_l=new JLabel("Output:                                       Code by juzeon.");
+		output_l=new JLabel("Code by juzeon.Program version:"+version_s);
 		tiebaName_l=new JLabel("Tieba name:");
 		pageBegin_l=new JLabel("Pages begin with:(number)");
 		pageEnd_l=new JLabel("Pages end with:(number)");
